@@ -1,0 +1,28 @@
+{
+  "industry": "HVAC & Commercial Refrigeration",
+  "version": "1.0.0",
+  "compliance_checks": [
+    {
+      "id": "epa-608-leak-rate",
+      "name": "Refrigerant Leak Rate Threshold",
+      "category": "EPA 608 Compliance",
+      "threshold_percent": 20,
+      "equipment_type": "Commercial Refrigeration (>50 lbs)",
+      "required_action": "Mandatory repair within 30 days and follow-up verification test."
+    },
+    {
+      "id": "superheat-subcooling",
+      "name": "Target Superheat / Subcooling Check",
+      "category": "System Efficiency",
+      "tolerance_f": 3,
+      "required_action": "Adjust TXV or refrigerant charge if outside ±3°F of OEM spec."
+    },
+    {
+      "id": "filter-drier-delta",
+      "name": "Liquid Line Filter Drier Pressure Drop",
+      "category": "Preventative Maintenance",
+      "max_delta_psi": 2,
+      "required_action": "Replace filter drier if temperature drop exceeds 2°F across drier."
+    }
+  ]
+}
