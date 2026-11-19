@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FieldGuard HVAC</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; background: #111; color: #f5f5f5; }
+    h1 { font-size: 1.4rem; margin-bottom: 4px; }
+    .meta { color: #aaa; font-size: 0.9rem; margin-bottom: 16px; }
+    .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+    .cat { font-size: 0.8rem; color: #58a6ff; font-weight: bold; }
+    .name { font-size: 1.05rem; font-weight: bold; margin: 4px 0; }
+    .action { font-size: 0.92rem; color: #ddd; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>FieldGuard HVAC</h1>
+  <div class="meta" id="meta">Loading compliance rules...</div>
+  <div id="checks"></div>
+
+  <script>
+    fetch("rules.json")
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById("meta").textContent =
+          `${data.industry} • v${data.version}`;
+        const container = document.getElementById("checks");
+        data.compliance_checks.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `
+            <div class="cat">${item.category}</div>
+            <div class="name">${item.name}</div>
+            <div class="action">${item.required_action}</div>
+          `;
+          container.appendChild(div);
+        });
+      })
+      .catch(() => {
+        document.getElementById("meta").textContent = "Could not load rules.json";
+      });
+  </script>
+</body>
+</html>
