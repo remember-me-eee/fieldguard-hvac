@@ -3,53 +3,285 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FieldGuard HVAC</title>
+  <title>FieldGuard HVAC — Superheat, Subcooling & Field Reference</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 16px; background: #111; color: #f5f5f5; }
-    h1 { font-size: 1.4rem; margin-bottom: 4px; }
-    .meta { color: #aaa; font-size: 0.9rem; margin-bottom: 16px; }
-    .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
-    .cat { font-size: 0.8rem; color: #58a6ff; font-weight: bold; }
-    .name { font-size: 1.05rem; font-weight: bold; margin: 4px 0; }
-    .action { font-size: 0.92rem; color: #ddd; margin-top: 6px; }
-    .sponsor-card { background: #16221c; border: 1px solid #2e7d5b; border-radius: 8px; padding: 14px; margin-top: 20px; }
-    .sponsor-cat { font-size: 0.78rem; color: #4ade80; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-    .sponsor-btn { display: inline-block; margin-top: 10px; padding: 10px 14px; background: #25D366; color: #0b1911; font-weight: bold; font-size: 0.9rem; text-decoration: none; border-radius: 6px; }
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-alt: #263349;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; max-width: 540px; margin: 0 auto; line-height: 1.5; }
+    header { text-align: center; padding: 12px 0 18px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+    header h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; color: var(--accent); }
+    header p { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab-btn {
+      flex: 1; padding: 10px 8px; background: var(--card); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px; margin-bottom: 16px;
+    }
+    .card h2 { font-size: 1.05rem; margin-bottom: 10px; color: var(--text); display: flex; align-items: center; justify-content: space-between; }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+    select, input {
+      width: 100%; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 1rem; margin-bottom: 12px;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-primary {
+      width: 100%; padding: 12px; background: var(--accent); color: #0f172a; border: none;
+      border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+    }
+    .result-box {
+      margin-top: 14px; padding: 14px; border-radius: 10px; background: var(--card-alt);
+      border-left: 4px solid var(--accent); display: none;
+    }
+    .result-box.show { display: block; }
+    .badge {
+      display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 0.75rem;
+      font-weight: 700; margin-bottom: 6px;
+    }
+    .badge.ok { background: rgba(34,197,94,0.2); color: var(--green); }
+    .badge.warn { background: rgba(245,158,11,0.2); color: var(--amber); }
+    .badge.bad { background: rgba(239,68,68,0.2); color: var(--red); }
+
+    /* Sponsor Card */
+    .sponsor-card {
+      background: linear-gradient(145deg, #064e3b, #0f172a);
+      border: 1.5px solid var(--green); border-radius: 14px; padding: 16px; margin-bottom: 18px;
+    }
+    .sponsor-tag {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--green); font-weight: 800; margin-bottom: 4px;
+    }
+    .sponsor-card h3 { font-size: 1.05rem; margin-bottom: 4px; }
+    .sponsor-card p { font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px; }
+    .btn-whatsapp {
+      display: block; width: 100%; text-align: center; padding: 12px; background: var(--green);
+      color: #052e16; font-weight: 800; text-decoration: none; border-radius: 10px; font-size: 0.95rem;
+    }
+    .btn-whatsapp:hover { background: var(--green-dark); color: #fff; }
+
+    /* Checklist */
+    .check-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item input[type="checkbox"] { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--green); }
+    .check-item.done span { text-decoration: line-through; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 6px; }
+    th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--accent); font-weight: 700; }
+    footer { text-align: center; font-size: 0.75rem; color: var(--muted); padding: 16px 0 24px; }
   </style>
 </head>
 <body>
-  <h1>FieldGuard HVAC</h1>
-  <div class="meta" id="meta">Loading compliance rules...</div>
-  <div id="checks"></div>
 
-  <div class="sponsor-card">
-    <div class="sponsor-cat">Featured Supplier Partner &bull; Spot Available</div>
-    <div class="name">Reach HVAC &amp; Refrigeration Technicians Daily</div>
-    <div class="action">Feature your spare parts shop, refrigerants, or service tools directly inside FieldGuard HVAC.</div>
-    <a class="sponsor-btn" href="https://wa.me/254720353326?text=Hi%2C%20I%27m%20interested%20in%20sponsoring%20the%20Featured%20Supplier%20spot%20on%20FieldGuard%20HVAC." target="_blank" rel="noopener">Book This Spot on WhatsApp</a>
+  <header>
+    <h1>FieldGuard HVAC</h1>
+    <p>On-Site Superheat, Subcooling &amp; Fault Reference (Kenya)</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('calc', this)">SH / SC Calc</button>
+    <button class="tab-btn" onclick="switchTab('pt', this)">P-T &amp; Gas Guide</button>
+    <button class="tab-btn" onclick="switchTab('check', this)">Job Checklist</button>
   </div>
 
+  <!-- TAB 1: CALCULATOR -->
+  <div id="calc" class="section active">
+    <div class="card">
+      <h2>Superheat &amp; Subcooling Diagnostic</h2>
+      <label for="refrigerant">Select Refrigerant</label>
+      <select id="refrigerant">
+        <option value="R410A">R-410A (Split &amp; Inverter AC)</option>
+        <option value="R134a">R-134a (Chillers, Fridges &amp; Auto)</option>
+        <option value="R404A">R-404A (Cold Rooms &amp; Freezers)</option>
+        <option value="R290">R-290 (Commercial Display &amp; Hydrocarbon)</option>
+        <option value="R22">R-22 (Legacy Systems — HCFC Phase-Out)</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label for="suctionSat">Evap Sat Temp (°C)</label>
+          <input type="number" id="suctionSat" placeholder="e.g. 4" step="0.1" />
+        </div>
+        <div>
+          <label for="suctionLine">Suction Line Temp (°C)</label>
+          <input type="number" id="suctionLine" placeholder="e.g. 10" step="0.1" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="liquidSat">Cond Sat Temp (°C)</label>
+          <input type="number" id="liquidSat" placeholder="e.g. 42" step="0.1" />
+        </div>
+        <div>
+          <label for="liquidLine">Liquid Line Temp (°C)</label>
+          <input type="number" id="liquidLine" placeholder="e.g. 36" step="0.1" />
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="calculateSHSC()">Run Field Diagnosis</button>
+
+      <div id="diagResult" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: P-T & GAS GUIDE -->
+  <div id="pt" class="section">
+    <div class="card">
+      <h2>Quick Pressure-Temp Reference (Bar / PSI)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Gas</th>
+            <th>Evap @ 0°C</th>
+            <th>Evap @ 5°C</th>
+            <th>Cond @ 40°C</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>R-410A</strong></td>
+            <td>7.0 Bar (102 PSI)</td>
+            <td>8.3 Bar (121 PSI)</td>
+            <td>23.2 Bar (336 PSI)</td>
+          </tr>
+          <tr>
+            <td><strong>R-134a</strong></td>
+            <td>1.9 Bar (28 PSI)</td>
+            <td>2.5 Bar (36 PSI)</td>
+            <td>9.2 Bar (133 PSI)</td>
+          </tr>
+          <tr>
+            <td><strong>R-404A</strong></td>
+            <td>5.0 Bar (73 PSI)</td>
+            <td>6.0 Bar (87 PSI)</td>
+            <td>17.2 Bar (250 PSI)</td>
+          </tr>
+          <tr>
+            <td><strong>R-290</strong></td>
+            <td>3.7 Bar (54 PSI)</td>
+            <td>4.5 Bar (65 PSI)</td>
+            <td>12.7 Bar (184 PSI)</td>
+          </tr>
+          <tr>
+            <td><strong>R-22</strong></td>
+            <td>4.0 Bar (58 PSI)</td>
+            <td>4.8 Bar (70 PSI)</td>
+            <td>14.3 Bar (208 PSI)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Critical Thresholds</h2>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:8px;">
+        <strong style="color:var(--text);">Filter Drier ΔT Limit:</strong> Max <strong>1.5°C (2°F)</strong> temp drop across liquid line drier. Higher = restricted/clogged drier—replace immediately.
+      </p>
+      <p style="font-size:0.85rem; color:var(--muted);">
+        <strong style="color:var(--text);">Target Ranges:</strong> TXV Subcooling: <strong>4°C – 7°C</strong> | Fixed Orifice Superheat: <strong>5°C – 8°C</strong>.
+      </p>
+    </div>
+  </div>
+
+  <!-- TAB 3: INTERACTIVE CHECKLIST -->
+  <div id="check" class="section">
+    <div class="card">
+      <h2>Pre-Handover Field Checklist</h2>
+      <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>Nitrogen pressure test passed (no drop over 15 mins)</span></label>
+      <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>Deep vacuum pulled below 500 microns &amp; held</span></label>
+      <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>Filter drier ΔT verified &lt; 1.5°C across inlet/outlet</span></label>
+      <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>Compressor running amps within nameplate RLA</span></label>
+      <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>Condensate drain flushed &amp; free-flowing</span></label>
+      <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>Superheat &amp; Subcooling within ±1.5°C of target</span></label>
+    </div>
+  </div>
+
+  <!-- FEATURED SUPPLIER PARTNER (MONETIZATION SLOT) -->
+  <div class="sponsor-card">
+    <div class="sponsor-tag">★ Exclusive Featured Supplier Spot</div>
+    <h3>Need Refrigerant Gas, Filter Driers or Spares Today?</h3>
+    <p>Sponsor this slot to receive direct WhatsApp part orders from Nairobi HVAC-R technicians on job sites.</p>
+    <a class="btn-whatsapp" href="https://wa.me/254720353326?text=Hello%2C%20I%20saw%20the%20Featured%20Supplier%20spot%20on%20FieldGuard%20HVAC%20and%20want%20to%20claim%20it%20for%20our%20shop." target="_blank" rel="noopener">
+      Claim Founding Supplier Spot (KES 3,500/mo)
+    </a>
+  </div>
+
+  <footer>
+    FieldGuard HVAC • Built for Field Technicians • Bookmarks &amp; Offline Ready
+  </footer>
+
   <script>
-    fetch("rules.json")
-      .then((res) => res.json())
-      .then((data) => {
-        document.getElementById("meta").textContent =
-          `${data.industry} • v${data.version}`;
-        const container = document.getElementById("checks");
-        data.compliance_checks.forEach((item) => {
-          const div = document.createElement("div");
-          div.className = "card";
-          div.innerHTML = `
-            <div class="cat">${item.category}</div>
-            <div class="name">${item.name}</div>
-            <div class="action">${item.required_action}</div>
-          `;
-          container.appendChild(div);
-        });
-      })
-      .catch(() => {
-        document.getElementById("meta").textContent = "Could not load rules.json";
-      });
+    function switchTab(id, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function toggleCheck(box) {
+      box.parentElement.classList.toggle('done', box.checked);
+    }
+
+    function calculateSHSC() {
+      const gas = document.getElementById('refrigerant').value;
+      const sSat = parseFloat(document.getElementById('suctionSat').value);
+      const sLine = parseFloat(document.getElementById('suctionLine').value);
+      const lSat = parseFloat(document.getElementById('liquidSat').value);
+      const lLine = parseFloat(document.getElementById('liquidLine').value);
+      const box = document.getElementById('diagResult');
+
+      if (isNaN(sSat) || isNaN(sLine)) {
+        box.innerHTML = '<span class="badge warn">Missing Input</span><p style="font-size:0.88rem;">Enter at least Evaporator Saturation Temp and Suction Line Temp (°C).</p>';
+        box.classList.add('show');
+        return;
+      }
+
+      const sh = (sLine - sSat).toFixed(1);
+      let html = `<strong>${gas} Superheat: ${sh}°C</strong><br>`;
+
+      if (sh < 3) {
+        html += `<span class="badge bad">Low Superheat — Floodback Risk</span><p style="font-size:0.85rem;margin-bottom:8px;">Check for overcharge, oversized/stuck-open TXV, or dirty evaporator airflow.</p>`;
+      } else if (sh > 10) {
+        html += `<span class="badge warn">High Superheat — Starving Evaporator</span><p style="font-size:0.85rem;margin-bottom:8px;">Likely undercharged (check for leak), restricted filter drier, or failing TXV.</p>`;
+      } else {
+        html += `<span class="badge ok">Superheat Normal (3°C – 10°C)</span><p style="font-size:0.85rem;margin-bottom:8px;">Evaporator refrigerant feed is in healthy operating range.</p>`;
+      }
+
+      if (!isNaN(lSat) && !isNaN(lLine)) {
+        const sc = (lSat - lLine).toFixed(1);
+        html += `<strong>${gas} Subcooling: ${sc}°C</strong><br>`;
+        if (sc < 3) {
+          html += `<span class="badge warn">Low Subcooling — Low Charge</span><p style="font-size:0.85rem;">System likely needs refrigerant top-up after leak check.</p>`;
+        } else if (sc > 9) {
+          html += `<span class="badge bad">High Subcooling — Overcharged / Restriction</span><p style="font-size:0.85rem;">Check for overcharge, dirty condenser coil, or liquid line restriction.</p>`;
+        } else {
+          html += `<span class="badge ok">Subcooling Normal (3°C – 9°C)</span><p style="font-size:0.85rem;">Condenser liquid seal is healthy.</p>`;
+        }
+      }
+
+      box.innerHTML = html;
+      box.classList.add('show');
+    }
   </script>
 </body>
 </html>
